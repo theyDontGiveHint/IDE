@@ -8,7 +8,7 @@ public class Interface {
      */
     public static void showMainScreen(UploadFile file) {
         if (file == null) {
-            System.out.println(
+            System.out.print(
                     """
                     ########################################
                     1. Java File Upload
@@ -41,7 +41,7 @@ public class Interface {
     }
 
     public static void showUploadScreen() {
-        System.out.println(
+        System.out.print(
             """
             ########################################
             [ 파일 업로드 ]

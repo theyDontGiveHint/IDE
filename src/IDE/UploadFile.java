@@ -10,13 +10,17 @@ public class UploadFile {
         this.filePath = path;
         this.fileDirectory = file.getParent();
 
-        this.compiledFileName = this.fileName.replace(".java", ".class");
-        this.compiledFilePath = this.filePath.replace(".java", ".class");
+        this.compiledFileName = this.fileName.replace(".java", "");
+
+        File parentDirectory = new File(this.fileDirectory);
+        this.packageName = parentDirectory.getName();
+        this.packageDirectory = parentDirectory.getParent();
     }
 
     protected String fileName;
     protected String filePath;
     protected String fileDirectory;
+    protected String packageName;
+    protected String packageDirectory;
     protected String compiledFileName;
-    protected String compiledFilePath;
 }

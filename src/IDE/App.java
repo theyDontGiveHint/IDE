@@ -92,7 +92,10 @@ public class App {
         try {
             // ! 업로드 상태, 컴파일 상태 둘 다 확인 필요
             if (this.uploadFile == null) {
-                System.out.println("업로드된 파일이 없습니다.\n먼저 파일을 업로드하고 컴파일하세요.");
+                System.out.println("업로드된 파일이 없습니다.\n먼저 파일을 업로드해 주세요.");
+                return;
+            } else if (this.controller == null) {
+                System.out.println("파일이 컴파일 되지 않았습니다.\n컴파일을 진행해 주세요.");
                 return;
             }
 
