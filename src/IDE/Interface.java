@@ -60,8 +60,6 @@ public class Interface {
 
     /**
      * 터미널을 초기화합니다.
-     * <p>
-     * ! 초기화 되지 않는 문제 해결 필요
      */
     public static void clearScreen() {
         try {

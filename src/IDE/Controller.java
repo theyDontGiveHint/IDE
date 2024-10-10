@@ -1,10 +1,9 @@
 package IDE;
 
-import java.util.Objects;
 import java.io.*;
 
 /**
- * ProcessBuilder 명령어를 제어하는 클래스입니다.
+ * ProcessBuilder 명령 제어 클래스
  */
 public class Controller {
     public Controller() {
@@ -28,7 +27,7 @@ public class Controller {
         try {
             this.processBuilder.directory(new File(file.packageDirectory));
             if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-                this.processBuilder.command("cmd.exe", "/c", "javac -sourcepath . $(find . -name '*.java')");
+                this.processBuilder.command("cmd.exe", "/c", "javac *.java");
             } else {
                 this.processBuilder.command("sh", "-c", "javac -sourcepath . $(find . -name '*.java')");
             }
@@ -47,8 +46,12 @@ public class Controller {
             this.stdErr = stdErrBuilder.toString();
             if (this.stdErr.isEmpty()) {
                 this.isCompiled = true;
+                Interface.clearScreen();
+                System.out.println("컴파일에 성공했습니다.\n");
             } else {
                 this.isError = true;
+                Interface.clearScreen();
+                System.out.println("컴파일에 실패했습니다.\nShow Compile Error에서 문제를 확인해 주세요.\n");
             }
         } catch (Exception e) {
             throw e;
@@ -58,7 +61,7 @@ public class Controller {
     /**
      * 컴파일 된 .class 파일을 실행합니다.
      *
-     * @param file 컴파일 된 업로드 파일
+     * @param file 업로드 파일
      */
     public void run(UploadFile file) throws IOException, InterruptedException {
         if (this.isError) {
@@ -85,6 +88,7 @@ public class Controller {
                 stdOutBuilder.append(line).append("\n");
             }
 
+            Interface.clearScreen();
             this.stdOut = stdOutBuilder.toString();
             System.out.println(this.stdOut);
         } catch (Exception e) {
@@ -97,9 +101,9 @@ public class Controller {
      */
     public void showError() {
         if (this.isError) {
-            System.out.println(Objects.requireNonNullElse(this.stdErr, "컴파일 오류가 발생하지 않았습니다."));
+            System.out.println(this.stdErr + "\n");
         } else {
-            System.out.println("컴파일 오류가 발생하지 않았습니다.");
+            System.out.println("컴파일 오류가 발생하지 않았습니다.\n");
         }
     }
 }
