@@ -27,11 +27,11 @@ public class Controller {
      */
     public void compile(UploadFile file) throws IOException, InterruptedException {
         try {
-            this.processBuilder.directory(new File(file.packageDirectory));
+            this.processBuilder.directory(new File(file.fileDirectory));
             if (System.getProperty("os.name").toLowerCase().contains("windows")) {
                 this.processBuilder.command("cmd.exe", "/c", "javac *.java");
             } else {
-                this.processBuilder.command("sh", "-c", "javac -sourcepath . $(find . -name '*.java')");
+                this.processBuilder.command("sh", "-c", "javac *.java");
             }
 
             Process process = this.processBuilder.start();
