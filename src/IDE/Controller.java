@@ -22,6 +22,8 @@ public class Controller {
      * 업로드 된 .java 파일을 컴파일합니다.
      *
      * @param file 업로드 파일
+     * @exception IOException StreamBuilder 발생 예외
+     * @exception InterruptedException StreamBuilder 발생 예외
      */
     public void compile(UploadFile file) throws IOException, InterruptedException {
         try {
@@ -62,6 +64,8 @@ public class Controller {
      * 컴파일 된 .class 파일을 실행합니다.
      *
      * @param file 업로드 파일
+     * @exception IOException StreamBuilder 발생 예외
+     * @exception InterruptedException StreamBuilder 발생 예외
      */
     public void run(UploadFile file) throws IOException, InterruptedException {
         if (this.isError) {

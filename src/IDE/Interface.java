@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class Interface {
     /**
-     * 메인 메뉴를 출력합니다.
+     * 메인 화면을 출력합니다.
      */
     public static void showMainScreen(UploadFile file) {
         if (file == null) {
@@ -40,6 +40,9 @@ public class Interface {
         }
     }
 
+    /**
+     * 업로드 화면을 출력합니다.
+     */
     public static void showUploadScreen() {
         System.out.print(
             """
