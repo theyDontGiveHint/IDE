@@ -1,6 +1,7 @@
 package IDE;
 
 import java.io.*;
+import java.util.Objects;
 
 /**
  * ProcessBuilder 명령 제어 클래스
@@ -76,9 +77,19 @@ public class Controller {
         try {
             this.processBuilder.directory(new File(file.packageDirectory));
             if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-                this.processBuilder.command("cmd.exe", "/c", String.format("java %s.%s", file.packageName, file.compiledFileName));
+                if (Objects.equals(file.packageName, "src")) {
+                    this.processBuilder.directory(new File(file.fileDirectory));
+                    this.processBuilder.command("cmd.exe", "/c", String.format("java %s", file.compiledFileName));
+                } else {
+                    this.processBuilder.command("cmd.exe", "/c", String.format("java %s.%s", file.packageName, file.compiledFileName));
+                }
             } else {
-                this.processBuilder.command("sh", "-c", String.format("java %s.%s", file.packageName, file.compiledFileName));
+                if (Objects.equals(file.packageName, "src")) {
+                    this.processBuilder.directory(new File(file.fileDirectory));
+                    this.processBuilder.command("sh", "-c", String.format("java %s", file.compiledFileName));
+                } else {
+                    this.processBuilder.command("sh", "-c", String.format("java %s.%s", file.packageName, file.compiledFileName));
+                }
             }
 
             Process process = this.processBuilder.start();
