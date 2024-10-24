@@ -6,8 +6,23 @@ import java.util.Scanner;
  * IDE App 클래스
  */
 public class App {
+    private static App instance;
     private UploadFile uploadFile;
     private Controller controller;
+
+    private App() {}
+
+    /**
+     * 싱글톤 인스턴스를 반환하는 메소드입니다.
+     *
+     * @return App 인스턴스
+     */
+    public static App getInstance() {
+        if(instance == null) {
+            instance = new App();
+        }
+        return instance;
+    }
 
     /**
      * IDE 메인 실행 메소드
