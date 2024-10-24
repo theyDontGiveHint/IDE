@@ -53,6 +53,12 @@ public class App {
             scanner.nextLine();    // Scanner 버퍼 초기화
             String filePath = scanner.nextLine();
 
+            if (!UploadFile.isFile(filePath)) {
+                Interface.clearScreen();
+                System.out.println("잘못된 파일 경로입니다.\n");
+                return;
+            }
+
             this.uploadFile = new UploadFile(filePath);
 
             Interface.clearScreen();
@@ -86,7 +92,7 @@ public class App {
         try {
             // ! 업로드 상태, 컴파일 상태 둘 다 확인 필요
             if (this.uploadFile == null) {
-                System.out.println("업로드된 파일이 없습니다.\n먼저 파일을 업로드해 주세요\n.");
+                System.out.println("업로드된 파일이 없습니다.\n먼저 파일을 업로드해 주세요.\n");
                 return;
             } else if (this.controller == null) {
                 System.out.println("파일이 컴파일 되지 않았습니다.\n컴파일을 진행해 주세요.\n");

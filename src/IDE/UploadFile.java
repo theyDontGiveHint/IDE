@@ -1,6 +1,9 @@
 package IDE;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * 업로드 파일 클래스
@@ -26,4 +29,8 @@ public class UploadFile {
     protected String packageName;
     protected String packageDirectory;
     protected String compiledFileName;
+
+    static boolean isFile(String filePath) {
+        return Files.isRegularFile(Paths.get(filePath));
+    }
 }
