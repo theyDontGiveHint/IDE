@@ -8,12 +8,39 @@ import java.awt.*;
 /**
  * IDE App 클래스
  */
-public class App {
-    private static App instance;
-    private UploadFile uploadFile;
-    private Controller controller;
+public class App extends JFrame {
+    // 생성자
+    private App() {
+        setTitle("They Don't Give Hint");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(1280, 800);
 
-    private App() {}
+        // 메뉴바 생성
+        setJMenuBar(ComponentFactory.createMenuBar(createMenuItems()));
+
+        // 텍스트 필드 포함 패널 생성
+        JPanel textFieldPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        textFieldPanel.add(this.filePathField);
+
+        // 요소 생성 및 초기화
+        this.textArea = new JTextArea();
+        this.resultTextArea = new JTextArea();
+        this.resultTextArea.setEditable(false);
+
+        // 분할 구역 생성
+        JScrollPane topPane = ComponentFactory.createTopPane(this.textArea);
+        JScrollPane bottomPane = ComponentFactory.createBottomPane(this.resultTextArea);
+
+        // 수평 분할 화면 생성
+        JSplitPane splitPane = ComponentFactory.createSplitPanel(topPane, bottomPane);
+
+        // 메인 패널 생성 및 구성
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.add(textFieldPanel, BorderLayout.NORTH);
+        mainPanel.add(splitPane, BorderLayout.CENTER);
+
+        setContentPane(mainPanel);
+    }
 
     /**
      * 싱글톤 인스턴스를 반환하는 메소드입니다.
