@@ -1,9 +1,11 @@
 package IDE;
 
-import IDE.listener.ActionListener;
-
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import javax.swing.AbstractAction;
+import javax.swing.KeyStroke;
 
 /**
  * IDE App 클래스
@@ -15,8 +17,10 @@ public class App extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1280, 800);
 
+        this.filePathField = new JTextField(30);
+
         // 메뉴바 생성
-        setJMenuBar(ComponentFactory.createMenuBar(createMenuItems()));
+        setJMenuBar(createMenuBar());
 
         // 텍스트 필드 포함 패널 생성
         JPanel textFieldPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -40,6 +44,9 @@ public class App extends JFrame {
         mainPanel.add(splitPane, BorderLayout.CENTER);
 
         setContentPane(mainPanel);
+
+        // Ctrl+R 단축키로 컴파일 실행
+        setUpKeyBindings();
     }
 
     /**
@@ -72,29 +79,53 @@ public class App extends JFrame {
      *
      * @return 생성된 메뉴 항목 배열
      */
-    private Object[] createMenuItems() {
-        Object[] components = new Object[7];
+    private JMenuBar createMenuBar() {
+        JMenuBar menuBar = new JMenuBar(); // 메뉴바 생성
 
-        // 메뉴 아이템 객체 추가
-        String[] menuItemNames = {"Browse", "Open", "Save", "Compile", "Save Errors", "Delete", "Clear"};
-        JMenuItem[] menuItems = new JMenuItem[menuItemNames.length];
-        for (int i = 0; i < menuItemNames.length; i++) {
-            menuItems[i] = new JMenuItem(menuItemNames[i]);
-            components[i] = menuItems[i];
+        // File 메뉴 생성
+        JMenu fileMenu = new JMenu("File");
+        String[] fileMenuItemNames = {"Browse", "Open", "Save", "Save As", "Delete", "Clear", "Quit"};
+        JMenuItem[] fileMenuItems = new JMenuItem[fileMenuItemNames.length];
+
+        for (int i = 0; i < fileMenuItemNames.length; i++) {
+            fileMenuItems[i] = new JMenuItem(fileMenuItemNames[i]); // 메뉴 아이템 생성
+            fileMenu.add(fileMenuItems[i]); // File 메뉴에 추가
         }
 
-        // 텍스트 필드 객체 추가
-        this.filePathField = new JTextField(30);
+        // File 메뉴 아이템 이벤트 추가
+        fileMenuItems[0].addActionListener(e -> actionListener.browseFile(this.filePathField, this));
+        fileMenuItems[1].addActionListener(e -> actionListener.openFile(this.textArea, this.resultTextArea));
+        fileMenuItems[2].addActionListener(e -> actionListener.saveFile(this.filePathField, this.textArea, this.resultTextArea));
+        fileMenuItems[3].addActionListener(e -> actionListener.saveAs(this.filePathField, this.textArea, this.resultTextArea));
+        fileMenuItems[4].addActionListener(e -> actionListener.deleteFile(this.filePathField, this.textArea, this.resultTextArea));
+        fileMenuItems[5].addActionListener(e -> actionListener.clear(this.filePathField, this.textArea, this.resultTextArea));
+        fileMenuItems[6].addActionListener(e -> actionListener.Quit());
 
-        // 이벤트 추가
-        menuItems[0].addActionListener(_ -> actionListener.browseFile(this.filePathField, this));
-        menuItems[1].addActionListener(_ -> actionListener.openFile(this.textArea, this.resultTextArea));
-        menuItems[2].addActionListener(_ -> actionListener.saveFile(this.filePathField, this.textArea, this.resultTextArea));
-        menuItems[3].addActionListener(_ -> actionListener.compileFile(this.resultTextArea));
-        menuItems[4].addActionListener(_ -> actionListener.saveErrors(this.resultTextArea));
-        menuItems[5].addActionListener(_ -> actionListener.deleteFile(this.filePathField, this.textArea, this.resultTextArea));
-        menuItems[6].addActionListener(_ -> actionListener.clear(this.filePathField, this.textArea, this.resultTextArea));
+        // Run 메뉴 생성
+        JMenu runMenu = new JMenu("Run");
+        JMenuItem compileMenuItem = new JMenuItem("Compile");
+        compileMenuItem.addActionListener(e -> actionListener.compileFile(this.resultTextArea)); // Compile 이벤트 추가
+        runMenu.add(compileMenuItem); // Run 메뉴에 Compile 추가
 
-        return components;
+        // 메뉴바에 File과 Run 메뉴 추가
+        menuBar.add(fileMenu);
+        menuBar.add(runMenu);
+
+        return menuBar; // 메뉴바 반환
+    }
+
+    /**
+     * Ctrl+R 단축키로 컴파일을 실행하는 메소드
+     */
+    private void setUpKeyBindings() {
+        // Ctrl+R 단축키로 컴파일 실행
+        KeyStroke compileKeyStroke = KeyStroke.getKeyStroke("control R");
+        textArea.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(compileKeyStroke, "compile");
+        textArea.getActionMap().put("compile", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actionListener.compileFile(resultTextArea);
+            }
+        });
     }
 }
