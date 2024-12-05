@@ -72,11 +72,7 @@ public class UploadFile {
     public String compile() throws IOException, InterruptedException {
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.directory(new File(this.fileDirectory));
-        if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-            processBuilder.command("javac", this.filePath);
-        } else {
-            processBuilder.command("javac", this.filePath);
-        }
+        processBuilder.command("javac", this.filePath);
 
         Process process = processBuilder.start();
         process.waitFor();
