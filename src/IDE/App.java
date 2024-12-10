@@ -25,7 +25,7 @@ public class App extends JFrame {
 
         // 상단 경로 Panel 생성 및 컴포넌트 추가
         this.pathField = new JTextField(50);
-        this.pathPanel = ComponentFactory.createPathPanel(this.pathField);
+        JPanel pathPanel = ComponentFactory.createPathPanel(this.pathField);
 
         // 메인 컴포넌트 생성 및 초기화
         this.tabArea = ComponentFactory.createTabbedPane();
@@ -46,9 +46,9 @@ public class App extends JFrame {
         JSplitPane splitPane = ComponentFactory.createSplitPanel(this.tabArea, new JScrollPane(this.resultArea));
 
         // 메인 패널 생성 및 구성
-        this.mainPanel = new JPanel(new BorderLayout());
-        this.mainPanel.add(this.pathPanel, BorderLayout.NORTH);
-        this.mainPanel.add(splitPane, BorderLayout.CENTER);
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.add(pathPanel, BorderLayout.NORTH);
+        mainPanel.add(splitPane, BorderLayout.CENTER);
 
         // 메인 화면 구성
         setContentPane(mainPanel);
@@ -63,11 +63,9 @@ public class App extends JFrame {
     private static App instance;
     private final IDEActionListener actionListener = new IDEActionListener();
 
-    public JPanel mainPanel;
-    public JPanel pathPanel;
-    public JTextField pathField;
-    public JTabbedPane tabArea;
-    public JTextArea resultArea;
+    private final JTextField pathField;
+    private final JTabbedPane tabArea;
+    private final JTextArea resultArea;
 
     private final Map<Component, IDEFile> fileMap = new HashMap<>();
     private final Map<Component, JTextArea> textAreaMap = new HashMap<>();
@@ -92,6 +90,11 @@ public class App extends JFrame {
     }
 
 
+    /**
+     * 현재 선택된 탭의 컴포넌트를 반환합니다.
+     *
+     * @return 선택된 탭 Component
+     */
     private Component getFocusedTabComponent() {
         int index = this.tabArea.getSelectedIndex();
         if (index == -1) {
@@ -100,7 +103,11 @@ public class App extends JFrame {
         return this.tabArea.getComponentAt(index);
     }
 
-
+    /**
+     * 주어진 IDEFile 객체를 새 탭으로 추가합니다.
+     *
+     * @param file IDEFile 객체
+     */
     private void addFileTab(IDEFile file) {
         JTextArea textArea = new JTextArea();
         JScrollPane scrollPane = new JScrollPane(textArea);
@@ -125,7 +132,11 @@ public class App extends JFrame {
         this.pathField.setText(file.filePath);
     }
 
-
+    /**
+     * 메뉴바를 생성하고 각 메뉴 아이템의 이벤트를 초기화합니다.
+     *
+     * @return JMenuBar
+     */
     private JMenuBar createMenuBar() {
         String[] fileMenuItemNames = {"Open", "Save", "Save As", "Close", "Quit"};
         JMenu fileMenu = ComponentFactory.createMenu("File", fileMenuItemNames);
@@ -223,6 +234,9 @@ public class App extends JFrame {
     }
 
 
+    /**
+     * 저장 여부를 확인한 후 저장합니다.
+     */
     private void checkAndSaveFile() {
         Component focusedComponent = getFocusedTabComponent();
         // 탭 오류 감지
@@ -237,13 +251,19 @@ public class App extends JFrame {
         // 확인 후 저장
         int option = JOptionPane.showConfirmDialog(this, "저장하시겠습니까?", "저장", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         if (option == JOptionPane.OK_OPTION) {
-            this.actionListener.saveFile(file, currentTextArea, this.resultArea);
+            try {
+                this.actionListener.saveFile(file, currentTextArea, this.resultArea);
+            } catch (Exception e) {
+                this.resultArea.setText("파일 저장 중 문제가 발생했습니다.");
+            }
         } else {
             this.resultArea.setText("파일 저장을 취소했습니다.");
         }
     }
 
-
+    /**
+     * 파일을 저장한 후 컴파일합니다.
+     */
     private void saveAndCompileFile() {
         Component focusedComponent = getFocusedTabComponent();
         // 탭 오류 감지
@@ -254,17 +274,21 @@ public class App extends JFrame {
 
         // 컴파일 호출
         IDEFile file = this.fileMap.get(focusedComponent);
-        this.actionListener.saveFile(file, this.textAreaMap.get(focusedComponent), this.resultArea);
-        this.actionListener.compileFile(file, this.resultArea);
+        try {
+            this.actionListener.saveFile(file, this.textAreaMap.get(focusedComponent), this.resultArea);
+            this.actionListener.compileFile(file, this.resultArea);
+        } catch (Exception e) {
+            this.resultArea.setText("컴파일 중 문제가 발생했습니다.");
+        }
     }
 
 
     /**
      * 지정한 키에 대해 액션을 바인딩합니다.
      *
-     * @param keyStrokeString 키 스트로크를 나타내는 문자열 (예: "ctrl S")
-     * @param actionName      액션을 식별하기 위한 이름
-     * @param action          키 입력 시 실행될 동작을 정의한 Action 객체
+     * @param keyStrokeString 연결할 KeyStroke 문자열
+     * @param actionName      액션을 식별자 이름
+     * @param action          실행될 Action
      */
     private void bindKey(String keyStrokeString, String actionName, Action action) {
         KeyStroke keyStroke = KeyStroke.getKeyStroke(keyStrokeString);
@@ -274,10 +298,8 @@ public class App extends JFrame {
         component.getActionMap().put(actionName, action);
     }
 
-
     /**
-     * 특정 키에 대해 액션을 연결합니다.
-     * 키와 해당 동작을 매핑하는 맵을 생성하고, 이를 bindKey 메서드를 통해 바인딩합니다.
+     * 단축키와 액션을 매핑하고 해당 액션을 연결합니다.
      */
     private void setUpKeyBindings() {
         Map<String, Runnable> keyActionMap = getActionMap();
@@ -294,7 +316,11 @@ public class App extends JFrame {
         });
     }
 
-
+    /**
+     * 단축키에 대응하는 액션 Map을 생성합니다.
+     *
+     * @return Action Map
+     */
     private Map<String, Runnable> getActionMap() {
         Map<String, Runnable> keyActionMap = new HashMap<>();
 
