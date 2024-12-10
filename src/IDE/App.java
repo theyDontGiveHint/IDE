@@ -31,6 +31,17 @@ public class App extends JFrame {
         this.tabArea = ComponentFactory.createTabbedPane();
         this.resultArea = ComponentFactory.createTextArea();
 
+        // 탭 변경 이벤트 연결
+        this.tabArea.addChangeListener(_ -> {
+            Component selectedComponent = this.tabArea.getSelectedComponent();
+            IDEFile currentFile = this.fileMap.get(selectedComponent);
+            if (currentFile != null) {
+                this.pathField.setText(currentFile.filePath);
+            } else {
+                this.pathField.setText("");
+            }
+        });
+
         // 수평 분할 화면 생성
         JSplitPane splitPane = ComponentFactory.createSplitPanel(this.tabArea, new JScrollPane(this.resultArea));
 
@@ -109,8 +120,9 @@ public class App extends JFrame {
             this.resultArea.setText("파일을 여는 중 문제가 발생했습니다.");
         }
 
-        // 생성한 Tab으로 전환
+        // 생성한 Tab으로 전환 및 경로 표시
         this.tabArea.setSelectedComponent(scrollPane);
+        this.pathField.setText(file.filePath);
     }
 
 
@@ -137,8 +149,7 @@ public class App extends JFrame {
 
         // Save 이벤트 연결
         fileMenu.getItem(1).addActionListener(_ -> {
-            Component focusedComponent = getFocusedTabComponent();
-            checkAndSaveFile(focusedComponent);
+            checkAndSaveFile();
         });
 
         // Save As 이벤트 연결
@@ -206,38 +217,45 @@ public class App extends JFrame {
         fileMenu.getItem(4).addActionListener(_ -> this.actionListener.quit());
 
         // Compile 이벤트 연결
-        runMenu.getItem(0).addActionListener(_ -> {
-            Component focusedComponent = getFocusedTabComponent();
-            // 탭 오류 감지
-            if (focusedComponent == null) {
-                this.resultArea.setText("선택된 탭이 없습니다.");
-                return;
-            }
-
-            // 컴파일 호출
-            IDEFile file = this.fileMap.get(focusedComponent);
-            this.actionListener.compileFile(file, this.resultArea);
-        });
+        runMenu.getItem(0).addActionListener(_ -> saveAndCompileFile());
 
         return ComponentFactory.createMenuBar(new JMenu[]{fileMenu, runMenu});
     }
 
 
-    private void checkAndSaveFile(Component focusedComponent) {
-        if (focusedComponent != null) {
-            IDEFile file = this.fileMap.get(focusedComponent);
-            JTextArea currentTextArea = this.textAreaMap.get(focusedComponent);
-
-            // 확인 후 저장
-            int option = JOptionPane.showConfirmDialog(this, "저장하시겠습니까?", "저장", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-            if (option == JOptionPane.OK_OPTION) {
-                this.actionListener.saveFile(file, currentTextArea, this.resultArea);
-            } else {
-                this.resultArea.setText("파일 저장을 취소했습니다.");
-            }
-        } else {
+    private void checkAndSaveFile() {
+        Component focusedComponent = getFocusedTabComponent();
+        // 탭 오류 감지
+        if (focusedComponent == null) {
             this.resultArea.setText("열린 파일이 없습니다.");
+            return;
         }
+
+        IDEFile file = this.fileMap.get(focusedComponent);
+        JTextArea currentTextArea = this.textAreaMap.get(focusedComponent);
+
+        // 확인 후 저장
+        int option = JOptionPane.showConfirmDialog(this, "저장하시겠습니까?", "저장", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (option == JOptionPane.OK_OPTION) {
+            this.actionListener.saveFile(file, currentTextArea, this.resultArea);
+        } else {
+            this.resultArea.setText("파일 저장을 취소했습니다.");
+        }
+    }
+
+
+    private void saveAndCompileFile() {
+        Component focusedComponent = getFocusedTabComponent();
+        // 탭 오류 감지
+        if (focusedComponent == null) {
+            this.resultArea.setText("선택된 탭이 없습니다.");
+            return;
+        }
+
+        // 컴파일 호출
+        IDEFile file = this.fileMap.get(focusedComponent);
+        this.actionListener.saveFile(file, this.textAreaMap.get(focusedComponent), this.resultArea);
+        this.actionListener.compileFile(file, this.resultArea);
     }
 
 
@@ -281,25 +299,13 @@ public class App extends JFrame {
         Map<String, Runnable> keyActionMap = new HashMap<>();
 
         // Compile 이벤트 생성
-        keyActionMap.put("ctrl R", () -> {
-            Component focusedComponent = getFocusedTabComponent();
-            // 탭 오류 감지
-            if (focusedComponent == null) {
-                this.resultArea.setText("선택된 탭이 없습니다.");
-                return;
-            }
-
-            // 저장 후 컴파일 실행
-            IDEFile file = this.fileMap.get(focusedComponent);
-            this.actionListener.saveFile(file, this.textAreaMap.get(focusedComponent), this.resultArea);
-            this.actionListener.compileFile(file, this.resultArea);
-        });
+        keyActionMap.put("ctrl R", this::saveAndCompileFile);
 
         // Save 이벤트 생성
-        keyActionMap.put("ctrl S", () -> {
-            Component focusedComponent = getFocusedTabComponent();
-            checkAndSaveFile(focusedComponent);
-        });
+        keyActionMap.put("ctrl S", this::checkAndSaveFile);
+
+        // Quit 이벤트 생성
+        keyActionMap.put("ctrl Q", this.actionListener::quit);
 
         return keyActionMap;
     }
