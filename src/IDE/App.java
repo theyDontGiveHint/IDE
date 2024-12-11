@@ -141,7 +141,7 @@ public class App extends JFrame {
         String[] fileMenuItemNames = {"Open", "Save", "Save As", "Close", "Quit"};
         JMenu fileMenu = ComponentFactory.createMenu("File", fileMenuItemNames);
 
-        String[] runMenuItemNames = {"Compile"};
+        String[] runMenuItemNames = {"Compile", "Run"};
         JMenu runMenu = ComponentFactory.createMenu("Run", runMenuItemNames);
 
         // Open 이벤트 연결
@@ -229,6 +229,9 @@ public class App extends JFrame {
 
         // Compile 이벤트 연결
         runMenu.getItem(0).addActionListener(_ -> saveAndCompileFile());
+        
+        // Run 이벤트 연결
+        runMenu.getItem(1).addActionListener(_ -> runFile());
 
         return ComponentFactory.createMenuBar(new JMenu[]{fileMenu, runMenu});
     }
@@ -282,6 +285,28 @@ public class App extends JFrame {
         }
     }
 
+    /**
+     * 컴파일 된 파일을 실행합니다.
+     */
+    private void runFile() {
+        Component focusedComponent = getFocusedTabComponent();
+        // 탭 오류 감지
+        if (focusedComponent == null) {
+            this.resultArea.setText("선택된 탭이 없습니다.");
+            return;
+        }
+
+        IDEFile file = this.fileMap.get(focusedComponent);
+        try {
+            // 파일 저장 후 실행
+            this.actionListener.saveFile(file, this.textAreaMap.get(focusedComponent), this.resultArea);
+            String runOutput = file.run();
+            this.resultArea.setText(runOutput);
+        } catch (Exception e) {
+            this.resultArea.setText(e.getMessage());
+        }
+    }
+
 
     /**
      * 지정한 키에 대해 액션을 바인딩합니다.
@@ -326,6 +351,9 @@ public class App extends JFrame {
 
         // Compile 이벤트 생성
         keyActionMap.put("ctrl R", this::saveAndCompileFile);
+
+        // Run 이벤트 생성
+        keyActionMap.put("ctrl T", this::runFile);
 
         // Save 이벤트 생성
         keyActionMap.put("ctrl S", this::checkAndSaveFile);

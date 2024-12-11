@@ -23,7 +23,6 @@ public class IDEFile {
     public String fileDirectory;
     public String fileName;
 
-
     /**
      * 자바 파일의 내용을 읽습니다.
      *
@@ -75,6 +74,39 @@ public class IDEFile {
             }
 
             return stdErrBuilder.toString();
+        } catch (IOException e) {
+            throw e;
+        }
+    }
+
+    public String run() throws IOException, InterruptedException {
+        String classFileName = this.fileName.replace(".java", ".class");
+        File classFile = new File(this.fileDirectory, classFileName);
+        if (!classFile.exists()) {
+            throw new FileNotFoundException("파일이 컴파일 되지 않았습니다.");
+        }
+
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.directory(new File(this.fileDirectory));
+        processBuilder.command("java", this.fileName.replace(".java", ""));
+
+        Process process;
+        try {
+            process = processBuilder.start();
+            process.waitFor();
+        } catch (IOException | InterruptedException e) {
+            throw e;
+        }
+
+        try (BufferedReader stdOutReader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            StringBuilder stdOutBuilder = new StringBuilder();
+
+            String line;
+            while ((line = stdOutReader.readLine()) != null) {
+                stdOutBuilder.append(line).append("\n");
+            }
+
+            return stdOutBuilder.toString();
         } catch (IOException e) {
             throw e;
         }
